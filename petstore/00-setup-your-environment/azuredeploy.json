@@ -3,65 +3,27 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "sites_azurepetstore_name": {
-            "defaultValue": "youraliasazurepetstore",
+            "defaultValue": "sfuzurepetstore",
             "type": "String"
         },
         "serverfarms_azurepetstoreasp_name": {
-            "defaultValue": "youraliasazurepetstoreasp",
-            "type": "String"
-        },
-        "registries_azurepetstorecr_name": {
-            "defaultValue": "youraliasazurepetstorecr",
+            "defaultValue": "sfuazurepetstoreasp",
             "type": "String"
         }
     },
     "variables": {},
     "resources": [
         {
-            "type": "Microsoft.ContainerRegistry/registries",
-            "apiVersion": "2020-11-01-preview",
-            "name": "[parameters('registries_azurepetstorecr_name')]",
-            "location": "eastus",
-            "sku": {
-                "name": "Standard",
-                "tier": "Standard"
-            },
-            "properties": {
-                "adminUserEnabled": false,
-                "policies": {
-                    "quarantinePolicy": {
-                        "status": "disabled"
-                    },
-                    "trustPolicy": {
-                        "type": "Notary",
-                        "status": "disabled"
-                    },
-                    "retentionPolicy": {
-                        "days": 7,
-                        "status": "disabled"
-                    }
-                },
-                "encryption": {
-                    "status": "disabled"
-                },
-                "dataEndpointEnabled": false,
-                "publicNetworkAccess": "Enabled",
-                "networkRuleBypassOptions": "AzureServices",
-                "zoneRedundancy": "Disabled",
-                "anonymousPullEnabled": false
-            }
-        },
-        {
             "type": "Microsoft.Web/serverfarms",
-            "apiVersion": "2018-02-01",
+            "apiVersion": "2023-01-01",
             "name": "[parameters('serverfarms_azurepetstoreasp_name')]",
-            "location": "East US",
+            "location": "Southeast Asia",
             "sku": {
-                "name": "P1v2",
-                "tier": "PremiumV2",
-                "size": "P1v2",
-                "family": "Pv2",
-                "capacity": 1
+                "name": "F1",
+                "tier": "Free",
+                "size": "F1",
+                "family": "F",
+                "capacity": 0
             },
             "kind": "linux",
             "properties": {
@@ -77,9 +39,9 @@
         },
         {
             "type": "Microsoft.Web/sites",
-            "apiVersion": "2018-11-01",
+            "apiVersion": "2023-01-01",
             "name": "[parameters('sites_azurepetstore_name')]",
-            "location": "East US",
+            "location": "Southeast Asia",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_azurepetstoreasp_name'))]"
             ],
@@ -115,9 +77,9 @@
         },
         {
             "type": "Microsoft.Web/sites/config",
-            "apiVersion": "2018-11-01",
+            "apiVersion": "2023-01-01",
             "name": "[concat(parameters('sites_azurepetstore_name'), '/web')]",
-            "location": "East US",
+            "location": "Southeast Asia",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', parameters('sites_azurepetstore_name'))]"
             ],
@@ -146,7 +108,7 @@
                 "scmType": "None",
                 "use32BitWorkerProcess": true,
                 "webSocketsEnabled": false,
-                "alwaysOn": true,
+                "alwaysOn": false,
                 "managedPipelineMode": "Integrated",
                 "virtualApplications": [
                     {
@@ -183,14 +145,14 @@
                 "http20Enabled": false,
                 "minTlsVersion": "1.2",
                 "ftpsState": "AllAllowed",
-                "reservedInstanceCount": 0
+                "PreWarmedInstanceCount": 0
             }
         },
         {
             "type": "Microsoft.Web/sites/hostNameBindings",
-            "apiVersion": "2018-11-01",
+            "apiVersion": "2023-01-01",
             "name": "[concat(parameters('sites_azurepetstore_name'), '/', parameters('sites_azurepetstore_name'), '.azurewebsites.net')]",
-            "location": "East US",
+            "location": "Southeast Asia",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', parameters('sites_azurepetstore_name'))]"
             ],
