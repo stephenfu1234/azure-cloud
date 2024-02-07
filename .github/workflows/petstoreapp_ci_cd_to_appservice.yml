@@ -1,17 +1,17 @@
-name: Pet Store App CI/CD to Azure App Service
-  
+name: Pet Store App CI/CD to Azure App Service with image from Dockerhub
+
 env:
-  AZURE_CONTAINER_REGISTRY: azurepetstorecontainerregistry.azurecr.io
-  AZURE_CONTAINER_REGISTRY_USERNAME: azurepetstorecontainerregistry
-  
+  DOCKER_USER: ${{secrets.DOCKER_USER}}
+  DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+  DOCKER_PATH: ${{secrets.DOCKER_PATH}}
+
 on:
   push:
     branches:
       - main
     paths:
       - petstore/petstoreapp/**
-  workflow_dispatch:
-      
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,17 +20,8 @@ jobs:
     - name: Checking the file system listing for Pet Store App
       run: |
         ls -al
-    - name: Build the Soul Machines React app
-      run: |
-        cd petstore/petstoreapp/soulmachines-react-app
-        npm install
-        npm run build
-    - name: Copy minified Soul Machines React app to Spring Boot static resources
-      run: |
-        mv petstore/petstoreapp/soulmachines-react-app/build/static/ petstore/petstoreapp/src/main/resources/static 
-        mv petstore/petstoreapp/soulmachines-react-app/build/index.html petstore/petstoreapp/src/main/resources/static/static
     - name: Update the version.json
-      run: echo -n -e "{\"version\":\"${{ github.sha }}\",\"date\":\"$(date '+%m-%d-%Y %H:%M:%S')\"}" > petstore/petstoreapp/src/main/resources/static/content/version.json
+      run: echo -n -e "{\"version\":\"$\",\"date\":\"$(date '+%m-%d-%Y %H:%M:%S')\"}" > petstore/petstoreapp/src/main/resources/static/content/version.json
     - run: cat petstore/petstoreapp/src/main/resources/static/content/version.json
     - uses: actions/setup-java@v2
       name: Building Pet Store App with Java 13
@@ -44,15 +35,21 @@ jobs:
       with:
         name: artifact
         path: petstore/petstoreapp/target/petstoreapp-0.0.1-SNAPSHOT.jar
-    - uses: azure/docker-login@v1
-      name: Build Docker image
-      with:
-        login-server: ${{ env.AZURE_CONTAINER_REGISTRY }}
-        username: ${{ env.AZURE_CONTAINER_REGISTRY_USERNAME }}
-        password: ${{ secrets.PETSTORECRSECRET }}
-    - name: Push Docker image to Azure Container Registry    
+    - uses: actions/checkout@v2
+    - name: Docker login
       run: |
-        docker build petstore/petstoreapp -t ${{env.AZURE_CONTAINER_REGISTRY}}/petstoreapp:latest -t ${{ env.AZURE_CONTAINER_REGISTRY }}/petstoreapp:${{ github.sha }}
-        docker push ${{ env.AZURE_CONTAINER_REGISTRY }}/petstoreapp:${{ github.sha }}
-        docker push  ${{ env.AZURE_CONTAINER_REGISTRY }}/petstoreapp:latest
-      
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+    - name: Build the docker image for apple silicon
+      run: docker build -t petstoreapp petstore/petstoreapp -t $DOCKER_USER/images:petstoreapp
+    - name: Docker push apple silicon image
+      run: docker push $DOCKER_USER/images:petstoreapp
+    - name: Build the docker image for x86
+      run: docker buildx build --platform linux/amd64 -t petstoreapplinux petstore/petstoreapp -t $DOCKER_USER/images:petstoreapplinux
+    - name: Docker push x64 image
+      run: docker push $DOCKER_USER/images:petstoreapplinux
+
+#    - name: Push Docker image to Dockerhub (2 version, one apple silicon, one for x86)
+#      run: |
+#        docker build petstore/petstoreapp -t $/petstoreapp:latest -t $/petstoreapp:$
+#        docker push $/petstoreapp:$
+#        docker push  $/petstoreapp:latest
