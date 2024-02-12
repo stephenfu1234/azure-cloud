@@ -1,0 +1,49 @@
+name: Pet Store App CI/CD to Azure App Service with image from Dockerhub
+
+env:
+  DOCKER_USER: ${{secrets.DOCKER_USER}}
+  DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+  DOCKER_PATH: ${{secrets.DOCKER_PATH}}
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - petstore/petstoreorderservice/**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checking the file system listing for Pet Store Order Service
+      run: |
+        ls -al
+    - name: Update the version.json
+      run: echo -n -e "{\"version\":\"$\",\"date\":\"$(date '+%m-%d-%Y %H:%M:%S')\"}" > petstore/petstoreorderservice/src/main/resources/static/content/version.json
+    - run: cat petstore/petstoreorderservice/src/main/resources/static/content/version.json
+    - uses: actions/setup-java@v2
+      name: Building Pet Store Order Service with Java 13
+      with:
+        java-version: '13'
+        distribution: 'adopt'
+    - name: Run Maven build
+      run: mvn -f petstore/petstoreorderservice/pom.xml --batch-mode --update-snapshots verify
+    - name: Upload Maven build artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: artifact
+        path: petstore/petstoreorderservice/target/petstoreorderservice-0.0.1-SNAPSHOT.jar
+    - uses: actions/checkout@v2
+    - name: Docker login
+      run: |
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+    - name: Build the docker image for apple silicon
+      run: docker build -t petstoreorderservice petstore/petstoreorderservice -t $DOCKER_USER/images:petstoreorderservice
+    - name: Docker push apple silicon image
+      run: docker push $DOCKER_USER/images:petstoreorderservice
+    - name: Build the docker image for x86
+      run: docker buildx build --platform linux/amd64 -t petstoreorderservicelinux petstore/petstoreorderservice -t $DOCKER_USER/images:petstoreorderservicelinux
+    - name: Docker push x64 image
+      run: docker push $DOCKER_USER/images:petstoreorderservicelinux
