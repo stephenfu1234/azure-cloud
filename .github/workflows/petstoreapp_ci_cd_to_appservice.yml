@@ -46,9 +46,3 @@ jobs:
       run: docker buildx build --platform linux/amd64 -t petstoreapplinux petstore/petstoreapp -t $DOCKER_USER/images:petstoreapplinux
     - name: Docker push x64 image
       run: docker push $DOCKER_USER/images:petstoreapplinux
-
-#    - name: Push Docker image to Dockerhub (2 version, one apple silicon, one for x86)
-#      run: |
-#        docker build petstore/petstoreapp -t $/petstoreapp:latest -t $/petstoreapp:$
-#        docker push $/petstoreapp:$
-#        docker push  $/petstoreapp:latest

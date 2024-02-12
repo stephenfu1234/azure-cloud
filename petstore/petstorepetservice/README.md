@@ -40,4 +40,3 @@ GET request for Pets (Accept: application/json and Content-Type: application/jso
 ```http://localhost:8081/petstorepetservice/v2/pet/findByStatus?status=available``` 
 
 test
-
