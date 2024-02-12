@@ -1,4 +1,4 @@
-name: Pet Store App CI/CD to Azure App Service with image from Dockerhub
+name: Pet Store Product Service CI/CD to Azure App Service with image from Dockerhub
 
 env:
   DOCKER_USER: ${{secrets.DOCKER_USER}}
