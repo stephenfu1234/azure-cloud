@@ -20,7 +20,7 @@ jobs:
       run: |
         ls -al
     - name: Update the version.json
-      run: echo -n -e "{\"version\":\"$\",\"date\":\"$(date '+%m-%d-%Y %H:%M:%S')\"}" > petstore/petstoreproductservice/src/main/resources/static/content/version.json
+      run: echo -n -e "{\"version\":\"$\",\"date\":\"$(date '+%m-%d-%Y %H:%M:%S')\"}" > petstore/petstoreproductservice/src/main/resources/version.json
     - run: cat petstore/petstoreproductservice/src/main/resources/static/content/version.json
     - uses: actions/setup-java@v2
       name: Building Pet Store Product Service with Java 13
