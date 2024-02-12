@@ -3,7 +3,6 @@ name: Pet Store App CI/CD to Azure App Service with image from Dockerhub
 env:
   DOCKER_USER: ${{secrets.DOCKER_USER}}
   DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-  DOCKER_PATH: ${{secrets.DOCKER_PATH}}
 
 on:
   push:
